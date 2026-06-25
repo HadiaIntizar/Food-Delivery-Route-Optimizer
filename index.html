@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery Route Optimizer | DAA Project</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-route"></i>
+                <h1>Food Delivery Route Optimizer</h1>
+            </div>
+            <p class="subtitle">DAA Project - Dijkstra vs Greedy Algorithm Visualization</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="panel-section">
+                    <h3><i class="fas fa-sliders-h"></i> Controls</h3>
+                    
+                    <div class="control-group">
+                        <button id="generateGraph" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> Generate New Map
+                        </button>
+                        <button id="addCustomer" class="btn btn-success">
+                            <i class="fas fa-plus-circle"></i> Add Customer
+                        </button>
+                        <button id="clearAll" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> Clear All
+                        </button>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="algorithmSelect">Select Algorithm:</label>
+                        <div class="algorithm-selector">
+                            <button class="algo-btn active" data-algo="both">
+                                <i class="fas fa-code-compare"></i> Compare Both
+                            </button>
+                            <button class="algo-btn" data-algo="dijkstra">
+                                <i class="fas fa-route"></i> Dijkstra Only
+                            </button>
+                            <button class="algo-btn" data-algo="greedy">
+                                <i class="fas fa-rocket"></i> Greedy Only
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label><i class="fas fa-tachometer-alt"></i> Animation Speed</label>
+                        <input type="range" id="speedControl" min="1" max="10" value="5">
+                    </div>
+
+                    <div class="control-group">
+                        <button id="runAlgorithm" class="btn btn-run">
+                            <i class="fas fa-play-circle"></i> Run Algorithm
+                        </button>
+                        <button id="stepByStep" class="btn btn-step">
+                            <i class="fas fa-step-forward"></i> Step by Step
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Panel -->
+                <div class="panel-section stats-panel">
+                    <h3><i class="fas fa-chart-line"></i> Performance Metrics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card dijkstra-stat">
+                            <h4>Dijkstra's Algorithm</h4>
+                            <div class="stat-item">
+                                <span>Total Distance:</span>
+                                <span id="dijkstra-distance" class="stat-value">0 km</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Time Taken:</span>
+                                <span id="dijkstra-time" class="stat-value">0 ms</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Nodes Visited:</span>
+                                <span id="dijkstra-nodes" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Efficiency:</span>
+                                <span id="dijkstra-efficiency" class="stat-value">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card greedy-stat">
+                            <h4>Greedy Algorithm</h4>
+                            <div class="stat-item">
+                                <span>Total Distance:</span>
+                                <span id="greedy-distance" class="stat-value">0 km</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Time Taken:</span>
+                                <span id="greedy-time" class="stat-value">0 ms</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Nodes Visited:</span>
+                                <span id="greedy-nodes" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>Efficiency:</span>
+                                <span id="greedy-efficiency" class="stat-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="panel-section">
+                    <h3><i class="fas fa-key"></i> Map Legend</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color restaurant"></div>
+                            <span>Restaurant</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color customer"></div>
+                            <span>Customer</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color dijkstra-path"></div>
+                            <span>Dijkstra's Path</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color greedy-path"></div>
+                            <span>Greedy Path</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color visited"></div>
+                            <span>Visited Node</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color unvisited"></div>
+                            <span>Unvisited Node</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="visualization-area">
+                <div class="canvas-container">
+                    <canvas id="deliveryMap" width="1000" height="700"></canvas>
+                    <div class="map-overlay">
+                        <div class="node-counter">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="nodeCount">20 Nodes</span>
+                        </div>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle"></i>
+                            <span id="statusText">Ready to Optimize</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Algorithm Progress -->
+                <div class="progress-container">
+                    <div class="progress-section">
+                        <h4>Dijkstra's Progress</h4>
+                        <div class="progress-bar">
+                            <div id="dijkstraProgress" class="progress-fill dijkstra-progress"></div>
+                        </div>
+                        <div id="dijkstraSteps" class="steps-info">Steps: 0</div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <h4>Greedy Progress</h4>
+                        <div class="progress-bar">
+                            <div id="greedyProgress" class="progress-fill greedy-progress"></div>
+                        </div>
+                        <div id="greedySteps" class="steps-info">Steps: 0</div>
+                    </div>
+                </div>
+
+                <!-- Code Visualization -->
+                <div class="code-visualization">
+                    <div class="code-window dijkstra-code">
+                        <div class="code-header">
+                            <i class="fab fa-js-square"></i>
+                            <h4>Dijkstra's Algorithm</h4>
+                            <span class="code-status">Paused</span>
+                        </div>
+                        <pre id="dijkstraCode"></pre>
+                    </div>
+                    
+                    <div class="code-window greedy-code">
+                        <div class="code-header">
+                            <i class="fab fa-js-square"></i>
+                            <h4>Greedy Algorithm</h4>
+                            <span class="code-status">Paused</span>
+                        </div>
+                        <pre id="greedyCode"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>DAA Project - Food Delivery Route Optimizer | Designed to Impress 😎</p>
+            <p class="footer-note">Visualization of Dijkstra's vs Greedy Algorithm for Optimal Food Delivery Routes</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
